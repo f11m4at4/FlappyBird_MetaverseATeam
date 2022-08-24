@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // 사용자가 점프버튼을 누르면 점프하게 하고 싶다.
 // 필요속성 : 점프파워, Rigidbody
@@ -10,7 +11,7 @@ using UnityEngine;
 public class Bird : MonoBehaviour
 {
     // Bird 의 상태
-    enum BirdState
+    public enum BirdState
     {
         Ready,
         Start,
@@ -18,17 +19,25 @@ public class Bird : MonoBehaviour
         Die
     }
 
-    BirdState state = BirdState.Ready;
+    public static BirdState state = BirdState.Ready;
 
     // 필요속성 : 점프파워, Rigidbody
     public float jumpPower = 2;
     Rigidbody2D rb;
+
+    Animator anim;
+
+    public GameObject readyText;
+    public GameObject gameoverText;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         // 물리 적용 안되도록
         rb.simulated = false;
+
+        anim = GetComponent<Animator>();
+        gameoverText.SetActive(false);
     }
 
     // Update is called once per frame
@@ -61,6 +70,8 @@ public class Bird : MonoBehaviour
         {
             currentTime = 0;
             state = BirdState.Start;
+            anim.SetTrigger("Fly");
+            readyText.SetActive(false);
         }
     }
 
@@ -92,7 +103,26 @@ public class Bird : MonoBehaviour
 
     private void Die()
     {
-        throw new NotImplementedException();
+        // 아무키나 누르면 다시 시작하고 싶다.
+        if(Input.anyKeyDown)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    // 부딪히면 상태를 Die 로 전환하고 싶다.
+    // 왼쪽 대각선 뒤로 쬐끔 튕기고 싶다.
+    public Vector2 dieSpeed = new Vector2(-1, 2);
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(state == BirdState.Die)
+        {
+            return;
+        }
+        state = BirdState.Die;
+        anim.SetTrigger("Die");
+        rb.velocity = dieSpeed;
+        gameoverText.SetActive(true);
     }
 
 }
