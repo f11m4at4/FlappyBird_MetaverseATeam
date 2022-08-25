@@ -36,6 +36,7 @@ public class Bird : MonoBehaviour
         // 물리 적용 안되도록
         rb.simulated = false;
 
+        state = BirdState.Ready;
         anim = GetComponent<Animator>();
         gameoverText.SetActive(false);
     }
@@ -125,4 +126,9 @@ public class Bird : MonoBehaviour
         gameoverText.SetActive(true);
     }
 
+    // ScoreArea 충돌하면 점수 올려주기
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        ScoreManager.Instance.Score++;
+    }
 }
